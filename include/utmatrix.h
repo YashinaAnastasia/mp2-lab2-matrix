@@ -4,10 +4,10 @@
 //   Переработано для Microsoft Visual Studio 2008 Сысоевым А.В. (21.04.2015)
 //
 // Верхнетреугольная матрица - реализация на основе шаблона вектора
-
+#pragma warning(disable : 4996)
 #ifndef __TMATRIX_H__
 #define __TMATRIX_H__
-
+#include<cstring>
 #include <iostream>
 
 using namespace std;
@@ -15,365 +15,486 @@ using namespace std;
 const int MAX_VECTOR_SIZE = 100000000;
 const int MAX_MATRIX_SIZE = 10000;
 
-// Шаблон вектора
-template <class ValType>
-class TVector
+template <class T>
+class Vector
 {
 protected:
-	ValType* pVector;
-	int Size;       // размер вектора
-	int StartIndex; // индекс первого элемента вектора
+	int size;
+	T* mas;
+	int startindex;
 public:
-	TVector(int s = 10, int si = 0);
-	TVector(const TVector& v);                // конструктор копирования
-	~TVector();
-	int GetSize() { return Size; } // размер вектора
-	int GetStartIndex() { return StartIndex; } // индекс первого элемента
-	ValType& operator[](int pos);             // доступ
-	bool operator==(const TVector& v) const;  // сравнение
-	bool operator!=(const TVector& v) const;  // сравнение
-	TVector& operator=(const TVector& v);     // присваивание
-
-	// скалярные операции
-	TVector  operator+(const ValType& val);   // прибавить скаляр
-	TVector  operator-(const ValType& val);   // вычесть скаляр
-	TVector  operator*(const ValType& val);   // умножить на скаляр
-
-	// векторные операции
-	TVector  operator+(const TVector& v);     // сложение
-	TVector  operator-(const TVector& v);     // вычитание
-	ValType  operator*(const TVector& v);     // скалярное произведение
-
-	// ввод-вывод
-	friend istream& operator>>(istream& in, TVector& v)
+	Vector(int i, int _startindex = 0);
+	Vector(const Vector <T>& x);
+	Vector();
+	~Vector();
+	Vector(int i, T* x);
+	int GetStartIndex()
 	{
-		for (int i = 0; i < v.Size; i++)
-			in >> v.pVector[i];
-		return in;
+		return startindex;
 	}
-	friend ostream& operator<<(ostream& out, const TVector& v)
+	int GetSize()
 	{
-		for (int i = 0; i < v.Size; i++)
-			out << v.pVector[i] << ' ';
-		return out;
+		return size;
+	}
+	Vector operator+(const Vector <T> x);
+	Vector& operator+=(const Vector<T> x) {
+		if (size == x.size) {
+			for (int i = 0; i < size; i++)
+			{
+				mas[i] += x.mas[i];
+			}
+			return *this;
+		}
+		else
+		{
+			Exception ex(__LINE__, __FILE__, __FUNCTION__, "Uncorrect operation");
+			throw ex;
+		}
+	};
+	Vector operator-(const Vector<T> x) {
+
+		if (size == x.size) {
+			Vector res;
+			res.size = x.size;
+			res.mas = new T[size];
+			for (int i = 0; i < size; i++)
+			{
+				res.mas[i] = mas[i] - x.mas[i];
+			}
+			return res;
+		}
+		else
+		{
+			Exception ex(__LINE__, __FILE__, __FUNCTION__, "Uncorrect operation");
+			throw ex;
+		}
+	};
+	Vector& operator-=(const Vector<T> x)
+	{
+		if (size == x.size) {
+			for (int i = 0; i < size; i++)
+			{
+				mas[i] -= x.mas[i];
+			}
+			return *this;
+		}
+		else
+		{
+			Exception ex(__LINE__, __FILE__, __FUNCTION__, "Uncorrect operation");
+			throw ex;
+		}
+	};
+	T operator*(const Vector<T>& x)//скалярное умножение
+	{
+		if (size == x.size)
+		{
+			T sum = 0;
+			for (int i = 0; i < size; i++)
+			{
+				sum += mas[i] * x.mas[i];
+			}
+			return sum;
+		}
+		else
+		{
+			Exception ex(__LINE__, __FILE__, __FUNCTION__, "Uncorrect operation");
+			throw ex;
+		}
+	};
+	Vector operator*(T y)//умножение на скаляр
+	{
+		Vector s(size);
+		for (int i = 0; i < size; i++)
+		{
+			s.mas[i] = mas[i] * y;
+		}
+		return s;
+	};
+	Vector operator/(T y)//деление на скаляр
+	{
+		if (y != 0)
+		{
+			Vector s(size);
+			for (int i = 0; i < size; i++)
+			{
+				s.mas[i] - mas[i] / y;
+			}
+			return s;
+		}
+		else
+		{
+			Exception ex(__LINE__, __FILE__, __FUNCTION__, "Uncorrect operation(деление на ноль)");
+			throw ex;
+		}
+	};
+	Vector& operator=(const Vector<T>& x)
+	{
+		if (this != &x)
+		{
+			if (size != x.size)
+			{
+				delete[] mas;
+				size = x.size;
+				startindex = x.startindex;
+				mas = new T[size];
+			}
+			for (int i = 0; i < size; i++)
+			{
+				mas[i] = x.mas[i];
+			}
+		}
+		return *this;
+	};
+	bool operator==(const Vector<T>& x)
+	{
+		bool a;
+		if (size == x.size)
+		{
+			for (int i = 0; i < size; i++)
+			{
+				if (mas[i] != x.mas[i])
+					return a = false;
+				else
+					a = true;
+			}
+			if (!a)
+				return false;
+			else
+				return true;
+		}
+		else
+			return false;
+
+	};
+	bool operator !=(const Vector<T>& x)
+	{
+		bool a;
+		if (size == x.size)
+		{
+			for (int i = 0; i < size; i++)
+			{
+				if (mas[i] != x.mas[i])
+					return a = true;
+				else
+					a = false;
+			}
+			if (a)
+				return true;
+			else
+				return false;
+		}
+		else
+			return true;
+	};
+	T& operator[](int i)
+	{
+		if (i >= 0 && i < size)
+		{
+			return mas[i];
+		}
+		else
+		{
+			Exception ex(__LINE__, __FILE__, __FUNCTION__, "Wrong index");
+			throw ex;
+		}
+	};
+	Vector operator++()// префиксный ++
+	{
+		for (int i = 0; i < size; i++)
+		{
+			mas[i] += 1;
+		}
+		return *this;
+	};
+	Vector operator++(int)// постфиксный ++
+	{
+		Vector tmp(*this);
+		for (int i = 0; i < size; i++)
+		{
+			mas[i]++;
+		}
+		return tmp;
+	};
+	friend ostream& operator<<(ostream& os, Vector <T>& x)
+	{
+		for (int i = 0; i < x.size; i++)
+		{
+			os << x.mas[i] << " ";
+		}
+		return os;
+	};
+
+	friend istream& operator>>(istream& is, Vector <T>& x)
+	{
+		setlocale(LC_CTYPE, "Russian");
+		cout << "введите компоненты  вектора" << endl;
+		for (int i = 0; i < x.size; i++)
+		{
+			cout << "введите " << i << " элемент" << endl;
+			is >> x.mas[i];
+		}
+		return is;
 	}
 };
-
-template <class ValType>
-TVector<ValType>::TVector(int s = 10, int si = 0)
+template <class T>
+Vector<T>::Vector()
 {
-	if ((s <= 0) || (s >= MAX_VECTOR_SIZE) || (si < 0))
-		throw s;
-	else
+	setlocale(LC_CTYPE, "Russian");
+	size = 1;
+	startindex = 0;
+	try {
+		mas = new T[size];
+		for (int i = 0; i < size; i++)
+		{
+			mas[i] = 1;
+		}
+	}
+	catch (bad_alloc)
 	{
-		Size = s;
-		StartIndex = si;
-		pVector = new ValType[Size];
+		Exception ex(__LINE__, __FILE__, __FUNCTION__, "bad alloc!");
+		throw ex;
 	}
 }
-/*-------------------------------------------------------------------------*/
-
-template <class ValType> //конструктор копирования
-TVector<ValType>::TVector(const TVector<ValType>& v)
+template <class T>
+Vector<T>::Vector(int i, int _startindex)
 {
-	Size = v.Size;
-	StartIndex = v.StartIndex;
-	pVector = new ValType[Size];
-	for (int i = 0; i < Size; i++)
+	if (i <= 0 || i >= MAX_VECTOR_SIZE)throw 1;
+	if (_startindex < 0)throw 1;
+	size = i;
+	startindex = _startindex;
+	try {
+		mas = new T[i];
+		for (int i = 0; i < size; i++)
+		{
+			mas[i] = 1;
+		}
+	}
+	catch (bad_alloc)
 	{
-		pVector[i] = v.pVector[i];
+		Exception ex(__LINE__, __FILE__, __FUNCTION__, "bad alloc!");
+		throw ex;
 	}
 }
-/*-------------------------------------------------------------------------*/
-
-template <class ValType>
-TVector<ValType>::~TVector()
+template <class T>
+Vector<T>::Vector(const Vector <T>& x)
 {
-	delete[] pVector;
-}
-/*-------------------------------------------------------------------------*/
+	size = x.size;
+	startindex = x.startindex;
+	try {
+		mas = new T[size];
 
-template <class ValType> // доступ
-ValType& TVector<ValType>::operator[](int pos)
-{
-	if ((pos < 0) || (pos > Size))
-		throw pos;
-	return pVector[pos - StartIndex];
-}
-/*-------------------------------------------------------------------------*/
-
-template <class ValType> // сравнение
-bool TVector<ValType>::operator==(const TVector& v) const
-{
-	if (Size != v.Size)
-		return false;
-	for (int i = 0; i < Size; i++)
-	{
-		if (pVector[i] != v.pVector[i])
-			return false;
+		for (int i = 0; i < size; i++)
+		{
+			mas[i] = x.mas[i];
+		}
 	}
-	return true;
-}
-/*-------------------------------------------------------------------------*/
-
-template <class ValType> // сравнение
-bool TVector<ValType>::operator!=(const TVector& v) const
-{
-	//return !(*this == v);
-	if (Size != v.Size)
-		return true;
-	for (int i = 0; i < Size; i++)
+	catch (bad_alloc)
 	{
-		if (pVector[i] != v.pVector[i])
-			return true;
+		Exception ex(__LINE__, __FILE__, __FUNCTION__, "bad alloc!");
+		throw ex;
 	}
-	return false;
 }
-/*-------------------------------------------------------------------------*/
-
-template <class ValType> // присваивание
-TVector<ValType>& TVector<ValType>::operator=(const TVector& v)
+template <class T>
+Vector<T>::~Vector()
 {
-	if (Size != v.Size)
-	{
-		delete[] pVector;
-		Size = v.Size;
-		pVector = new ValType[Size];
+	delete[]mas;
+}
+template <class T>
+Vector<T>::Vector(int i, T* x)
+{
+	size = i;
+	try {
+		mas = new T[size];
+
+		for (int j = 0; j < size; j++)
+		{
+			mas[j] = x[j];
+		}
 	}
-	StartIndex = v.StartIndex;
-	for (int i = 0; i < Size; i++)
-		pVector[i] = v.pVector[i];
-	return *this;
-}
-/*-------------------------------------------------------------------------*/
-
-template <class ValType> // прибавить скаляр
-TVector<ValType> TVector<ValType>::operator+(const ValType& val)
-{
-	TVector<ValType> tmp(Size, StartIndex);
-	for (int i = 0; i < Size; i++)
-		tmp.pVector[i] = pVector[i] + val;
-	return tmp;
-}
-/*-------------------------------------------------------------------------*/
-
-template <class ValType> // вычесть скаляр
-TVector<ValType> TVector<ValType>::operator-(const ValType& val)
-{
-	TVector<ValType> tmp(Size, StartIndex);
-	for (int i = 0; i < Size; i++)
-		tmp.pVector[i] = pVector[i] - val;
-	return tmp;
-}
-/*-------------------------------------------------------------------------*/
-
-template <class ValType> // умножить на скаляр
-TVector<ValType> TVector<ValType>::operator*(const ValType& val)
-{
-	TVector<ValType> tmp(Size, StartIndex);
-	for (int i = 0; i < Size; i++)
-		tmp.pVector[i] = pVector[i] * val;
-	return tmp;
-}
-/*-------------------------------------------------------------------------*/
-
-template <class ValType> // сложение
-TVector<ValType> TVector<ValType>::operator+(const TVector<ValType>& v)
-{
-	/*if ( Size > v.Size )
+	catch (bad_alloc)
 	{
-		TVector<ValType> tmp(Size, StartIndex);
-		for (int i = 0; i < v.Size; i++)
-			tmp.pVector[i] = pVector[i] + v.pVector[i];
-		for (int i = v.Size; i < Size; i++)
-			tmp.pVector[i] = pVector[i];
-		return tmp;
+		Exception ex(__LINE__, __FILE__, __FUNCTION__, "bad alloc!");
+		throw ex;
+	}
+}
+template <class T>
+Vector<T> Vector<T>::operator+(const Vector<T> x)
+{
+	if (size == x.size)
+	{
+		Vector res;
+		res.size = x.size;
+		try {
+			res.mas = new T[size];
+
+			for (int i = 0; i < size; i++)
+			{
+				res.mas[i] = mas[i] + x.mas[i];
+			}
+
+			return res;
+		}
+		catch (bad_alloc)
+		{
+			Exception ex(__LINE__, __FILE__, __FUNCTION__, "bad alloc!");
+			throw ex;
+		}
 	}
 	else
-	{*/
-	if (Size != v.Size)
-		throw (Size);
-	else
 	{
-		TVector<ValType> tmp(Size, StartIndex);
-		for (int i = 0; i < Size; i++)
-			tmp.pVector[i] = pVector[i] + v.pVector[i];
-		return tmp;
+		Exception ex(__LINE__, __FILE__, __FUNCTION__, "Uncorrect operation!");
+		throw ex;
 	}
 }
-/*-------------------------------------------------------------------------*/
-
-template <class ValType> // вычитание
-TVector<ValType> TVector<ValType>::operator-(const TVector<ValType>& v)
-{
-	/*if ( Size > v.Size )
-	{
-		TVector<ValType> tmp(Size, StartIndex);
-		for (int i = 0; i < v.Size; i++)
-			tmp.pVector[i] = pVector[i] - v.pVector[i];
-		for (int i = v.Size; i < Size; i++)
-			tmp.pVector[i] = pVector[i];
-		return tmp;
-	}
-	else
-	{*/
-	if (Size != v.Size)
-		throw (Size);
-	else
-	{
-		TVector<ValType> tmp(v.Size, v.StartIndex);
-		for (int i = 0; i < Size; i++)
-			tmp.pVector[i] = pVector[i] - v.pVector[i];
-		return tmp;
-	}
-}
-/*-------------------------------------------------------------------------*/
-
-template <class ValType> // скалярное произведение
-ValType TVector<ValType>::operator*(const TVector<ValType>& v)
-{
-	if (Size != v.Size)
-		throw (Size);
-	else
-	{
-		ValType tmp = 0;
-		for (int i = 0; i < Size; i++)
-			tmp = tmp + (pVector[i] * v.pVector[i]);
-		return tmp;
-	}
-}
-/*-------------------------------------------------------------------------*/
-
-
+//f,d
 // Верхнетреугольная матрица
 template <class ValType>
-class TMatrix : public TVector<TVector<ValType> >
+class TMatrix : public Vector<Vector<ValType> >
 {
 public:
-	TMatrix(int s = 10);
-	TMatrix(const TMatrix& mt);                    // копирование
-	TMatrix(const TVector<TVector<ValType> >& mt); // преобразование типа
+	TMatrix(int s = 10) : Vector<Vector<ValType>>(s)
+	{
+		if (s >= MAX_MATRIX_SIZE) throw 1;
+		//startindex = 0;
+		for (int i = 0; i < s; i++)
+		{
+			Vector<ValType> temp(size - i, i);
+			mas[i] = temp;
+		}
+	};
+	TMatrix(const TMatrix& mt) : Vector<Vector<ValType>>(mt) {};                    // копирование
+	TMatrix(const Vector<Vector<ValType> >& mt) : Vector<Vector<ValType>>(mt) {}; // преобразование типа
 	bool operator==(const TMatrix& mt) const;      // сравнение
 	bool operator!=(const TMatrix& mt) const;      // сравнение
 	TMatrix& operator= (const TMatrix& mt);        // присваивание
 	TMatrix  operator+ (const TMatrix& mt);        // сложение
 	TMatrix  operator- (const TMatrix& mt);        // вычитание
+	int GetSize();                                 //получить размер
+	operator Vector<Vector<ValType>>()
+	{
+		return Vector<Vector<ValType>>;
+	}
 
 	// ввод / вывод
 	friend istream& operator>>(istream& in, TMatrix& mt)
 	{
-		for (int i = 0; i < mt.Size; i++)
-			in >> mt.pVector[i];
+		for (int i = 0; i < mt.size; i++)
+			in >> mt.mas[i];
 		return in;
 	}
 	friend ostream& operator<<(ostream& out, const TMatrix& mt)
 	{
-		for (int i = 0; i < mt.Size; i++)
-			out << mt.pVector[i] << endl;
+		for (int i = 0; i < mt.size; i++)
+			out << mt.mas[i] << endl;
 		return out;
 	}
 };
 
-template <class ValType>
-TMatrix<ValType>::TMatrix(int s) : TVector<TVector<ValType> >(s)
+template<class ValType>
+int TMatrix<ValType>::GetSize()
 {
-	if ((s <= 0) || (s >= MAX_MATRIX_SIZE))
-		throw s;
-	else
-	{
-		for (int i = 0; i < s; i++)
-		{
-			TVector <ValType> tmp(s - i, i);
-			pVector[i] = tmp;
-			//pVector[i]= TVector<ValType>(s,i);
-		}
-	}
+	return size;
 }
-/*-------------------------------------------------------------------------*/
-
-template <class ValType> // конструктор копирования
-TMatrix<ValType>::TMatrix(const TMatrix<ValType>& mt) : TVector<TVector<ValType> >(mt) // вызываем контруктор копирования для векторов т.к матирица - вектор векторов
-{
-}
-
-/*-------------------------------------------------------------------------*/
-template <class ValType> // конструктор преобразования типа
-TMatrix<ValType>::TMatrix(const TVector<TVector<ValType> >& mt) : TVector<TVector<ValType> >(mt)
-{
-}
-/*-------------------------------------------------------------------------*/
 template <class ValType> // сравнение
 bool TMatrix<ValType>::operator==(const TMatrix<ValType>& mt) const
 {
-	if (Size != mt.Size)
-		return false;
-	else
+	if (size != mt.size) return false;
+	for (int i = 0; i < size; i++)
 	{
-		for (int i = 0; i < Size; i++)
-			if (pVector[i] != mt.pVector[i])
-				return false;
-		return true;
+		if (mas[i] != mt.mas[i]) return false;
 	}
+	return true;
 }
-/*-------------------------------------------------------------------------*/
 
 template <class ValType> // сравнение
 bool TMatrix<ValType>::operator!=(const TMatrix<ValType>& mt) const
 {
-	if (Size != mt.Size)
-		return true;
-	for (int i = 0; i < Size; i++)
+	if (size != mt.size) return true;
+	for (int i = 0; i < size; i++)
 	{
-		if (pVector[i] != mt.pVector[i])
-			return true;
+		if (mas[i] != mt.mas[i]) return true;
 	}
 	return false;
 }
-/*-------------------------------------------------------------------------*/
 
 template <class ValType> // присваивание
 TMatrix<ValType>& TMatrix<ValType>::operator=(const TMatrix<ValType>& mt)
 {
-	if (Size != mt.Size)
+	startindex = mt.startindex;
+	if (size != mt.size)
 	{
-		delete[] pVector;
-		Size = mt.Size;
-		pVector = new TVector <ValType>[Size];
+		size = mt.size;
+		delete[] mas;
+		mas = new Vector<ValType>[size];
 	}
-	for (int i = 0; i < Size; i++)
-		pVector[i] = mt.pVector[i];
+	for (int i = 0; i < size; i++)
+	{
+		mas[i] = mt.mas[i];
+	}
 	return *this;
+
 }
-/*-------------------------------------------------------------------------*/
 
 template <class ValType> // сложение
 TMatrix<ValType> TMatrix<ValType>::operator+(const TMatrix<ValType>& mt)
 {
-	if (Size != mt.Size)
-		throw Size;
-	TMatrix<ValType> tmp(Size);
-	for (int i = 0; i < Size; i++)
-		tmp.pVector[i] = pVector[i] + mt.pVector[i];
-	return tmp;
-	//return TVector<TVector<ValType> > :: operator+ (mt); 
+	return Vector<Vector<ValType>>::operator+(mt);
 }
-/*-------------------------------------------------------------------------*/
 
 template <class ValType> // вычитание
 TMatrix<ValType> TMatrix<ValType>::operator-(const TMatrix<ValType>& mt)
 {
-	if (Size != mt.Size)
-		throw Size;
-	TMatrix<ValType> tmp(Size);
-	if (Size == mt.Size)
-		for (int i = 0; i < Size; i++)
-			tmp.pVector[i] = pVector[i] - mt.pVector[i];
-	return tmp;
-	//return TVector<TVector<ValType> > :: operator- (mt); 
+	return Vector<Vector<ValType>>::operator-(mt);
 }
-/*-------------------------------------------------------------------------*/
+
 
 // TVector О3 Л2 П4 С6
 // TMatrix О2 Л2 П3 С3
+class Exception
+{
+	int Line;// строка, где возникло исключение
+	char* File;//файл,где произошло исключение
+	char* funck;//функция,где произошло исключение
+	char* Descr;//тип исключения
+public:
+	Exception(int i, const char* f, const char* fu, const char* d)
+	{
+		Line = i;
+		int n = strlen(f) + 1;
+		File = new char[n];
+		strcpy(File, f);
+		n = strlen(fu) + 1;
+		funck = new char[n];
+		strcpy(funck, fu);
+		n = strlen(d) + 1;
+		Descr = new char[n];
+		strcpy(Descr, d);
+	};
+	Exception(const Exception& a)
+	{
+		Line = a.Line;
+		int n = strlen(a.File);
+		File = new char[n];
+		strcpy(File, a.File);
+		n = strlen(a.funck);
+		funck = new char[n];
+		strcpy(funck, a.funck);
+		n = strlen(a.Descr);
+		Descr = new char[n];
+		strcpy(Descr, a.Descr);
+	};
+	Exception()
+	{
+		delete[] File;
+		delete[] funck;
+		delete[] Descr;
+	};
+	void print()
+	{
+		std::cout << Descr << std::endl;
+		std::cout << "Humber file: " << File << std::endl;
+		std::cout << "Name function: " << funck << std::endl;
+		std::cout << "Numder line: " << Line << std::endl;
+	};
+};
 #endif
-
