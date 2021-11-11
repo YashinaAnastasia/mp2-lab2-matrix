@@ -34,17 +34,13 @@ TEST(TMatrix, copied_matrix_is_equal_to_source_one)
 
 TEST(TMatrix, copied_matrix_has_its_own_memory)
 {
-	TMatrix<int> s(5);
-	TMatrix<int> a(s);
-	for (int i = 0; i < 5; i++)
-		for (int j = 0; j < 5 - i; j++)
-		{
-			a[i][j] = i * 10 + j;
-		}
+	TMatrix<int> m(5);
+	TMatrix<int> m1(m);
 
-	bool f = a != s;
+	m[0][0] = 1;
+	m1[0][0] = 2;
 
-	EXPECT_EQ(f, 1);
+	EXPECT_NE(m[0][0], m1[0][0]);
 }
 
 TEST(TMatrix, can_get_size)
@@ -82,15 +78,14 @@ TEST(TMatrix, can_assign_matrix_to_itself)
 
 TEST(TMatrix, can_assign_matrices_of_equal_size)
 {
-	TMatrix<int> s(5);
-	TMatrix<int> a(5);
-	for (int i = 0; i < 5; i++)
-		for (int j = 0; j < 5 - i; j++)
-		{
-			a[i][j] = i * 10 + j;
-		}
-	ASSERT_NO_THROW(s = a);
-	EXPECT_EQ(a, s);
+	TMatrix<int> m(5);
+	TMatrix<int> m1(5);
+	for (int i = 0; i < m.GetSize(); i++)
+		m1[i] = 1;
+
+	ASSERT_NO_THROW(m = m1);
+	m = m1;
+	EXPECT_EQ(m, m1);
 }
 
 TEST(TMatrix, assign_operator_change_matrix_size)
@@ -103,39 +98,41 @@ TEST(TMatrix, assign_operator_change_matrix_size)
 
 TEST(TMatrix, can_assign_matrices_of_different_size)
 {
-	TMatrix<int> s(5);
-	TMatrix<int> a(5);
-	for (int i = 0; i < 5; i++)
-		for (int j = 0; j < 5 - i; j++)
-		{
-			a[i][j] = i * 10 + j;
-		}
-	s = a;
-	EXPECT_EQ(a, s);
+	TMatrix<int> m(1);
+	TMatrix<int> m1(2);
+
+	m[0][0] = 1;     
+
+	m1[0][0] = 1;     
+	m1[0][1] = 1;     
+	m1[1][1] = 1;
+
+	ASSERT_NO_THROW(m = m1);
+	m = m1;
+	EXPECT_EQ(m, m1);
 }
 
 TEST(TMatrix, compare_equal_matrices_return_true)
 {
-	TMatrix<int> s(5);
-	TMatrix<int> a(5);
-	for (int i = 0; i < 5; i++)
-		for (int j = 0; j < 5 - i; j++)
-		{
-			a[i][j] = i * 10 + j;
-		}
-	s = a;
-	EXPECT_TRUE(a == s);
+	TMatrix<int> m(2);
+	TMatrix<int> m1(2);
+
+	m[0][0] = 1;     
+	m[0][1] = 1;     
+	m[1][1] = 1;
+
+	m1[0][0] = 1;     
+	m1[0][1] = 1;     
+	m1[1][1] = 1;
+
+	ASSERT_TRUE(m == m1);
 }
 
 TEST(TMatrix, compare_matrix_with_itself_return_true)
 {
-	TMatrix<int> a(5);
-	for (int i = 0; i < 5; i++)
-		for (int j = 0; j < 5 - i; j++)
-		{
-			a[i][j] = i * 10 + j;
-		}
-	EXPECT_TRUE(a == a);
+	TMatrix<int> m(5);
+
+	ASSERT_TRUE(m == m);
 }
 
 TEST(TMatrix, matrices_with_different_size_are_not_equal)
@@ -146,17 +143,26 @@ TEST(TMatrix, matrices_with_different_size_are_not_equal)
 
 TEST(TMatrix, can_add_matrices_with_equal_size)
 {
-	TMatrix<int> s(5);
-	TMatrix<int> res(5);
-	TMatrix<int> a(5);
-	for (int i = 0; i < 5; i++)
-		for (int j = 0; j < 5 - i; j++)
-		{
-			a[i][j] = i * 10 + j;
-			s[i][j] = i * 10 + j + 1;
-			res[i][j] = a[i][j] + s[i][j];
-		}
-	EXPECT_EQ(res, a + s);
+	TMatrix<int> m(2);
+	TMatrix<int> m1(2);
+	TMatrix<int> m2(2);
+	TMatrix<int> m3(2);
+
+	m[0][0] = 1;     
+	m[0][1] = 1;     
+	m[1][1] = 1;
+
+	m1[0][0] = 2;     
+	m1[0][1] = 3;     
+	m1[1][1] = 4;
+
+	m3[0][0] = 3;     
+	m3[0][1] = 4;     
+	m3[1][1] = 5;
+
+	ASSERT_NO_THROW(m + m1);
+	m2 = m + m1;
+	EXPECT_EQ(m2, m3);
 
 }
 
@@ -169,17 +175,26 @@ TEST(TMatrix, cant_add_matrices_with_not_equal_size)
 
 TEST(TMatrix, can_subtract_matrices_with_equal_size)
 {
-	TMatrix<int> a(5);
-	TMatrix<int> s(5);
-	TMatrix<int> res(5);
-	for (int i = 0; i < 5; i++)
-		for (int j = 0; j < 5 - i; j++)
-		{
-			a[i][j] = i * 10 + j;
-			s[i][j] = i * 10 + j + 1;
-			res[i][j] = a[i][j] - s[i][j];
-		}
-	EXPECT_EQ(res, a - s);
+	TMatrix<int> m(2);
+	TMatrix<int> m1(2);
+	TMatrix<int> m2(2);
+	TMatrix<int> m3(2);
+
+	m[0][0] = 2;     
+	m[0][1] = 3;     
+	m[1][1] = 4;
+
+	m1[0][0] = 1;     
+	m1[0][1] = 1;     
+	m1[1][1] = 1;
+
+	m3[0][0] = 1;     
+	m3[0][1] = 2;     
+	m3[1][1] = 3;
+
+	ASSERT_NO_THROW(m - m1);
+	m2 = m - m1;
+	EXPECT_EQ(m2, m3);
 }
 
 TEST(TMatrix, cant_subtract_matrixes_with_not_equal_size)
@@ -187,15 +202,5 @@ TEST(TMatrix, cant_subtract_matrixes_with_not_equal_size)
 	TMatrix<int> a(5);
 	TMatrix<int> s(4);
 	EXPECT_ANY_THROW(a - s);
-}
-TEST(TMatrix, can_create_matrix)
-{
-	ASSERT_NO_THROW(TMatrix<int> a);
-}
-TEST(TMatrix, can_use_constructor_preobrazovaniya_tipa)
-{
-	TMatrix<int> s(5);
-	Vector<Vector<int>> a;
-	ASSERT_NO_THROW(a = s);
 }
 
